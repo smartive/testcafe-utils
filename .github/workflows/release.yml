@@ -17,7 +17,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run lint
-      - run: npx semantic-release
+      - run: npx -p @semantic-release/changelog -p semantic-release semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
