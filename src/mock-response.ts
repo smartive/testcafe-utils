@@ -1,9 +1,12 @@
 import { mockHeaders } from './mock-headers';
 
-export const mockResponse = (fixture: unknown, statusCode = 200, method = 'GET', additionalHeaders = {}) => (
-  _req: RequestOptions,
-  res: ResponseMock & { method: string },
-): void => {
+export type MockResponseBody = (req: RequestOptions, res: ResponseMock & { method?: string }) => unknown;
+export const mockResponse = (
+  fixture: unknown,
+  statusCode = 200,
+  method = 'GET',
+  additionalHeaders = {},
+): MockResponseBody => (_, res) => {
   res.headers = {
     ...mockHeaders,
     'content-type': 'application/json',

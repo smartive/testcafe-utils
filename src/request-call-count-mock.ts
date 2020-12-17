@@ -1,8 +1,9 @@
 import { RequestHook } from 'testcafe';
 import { ResponseMock } from 'testcafe-hammerhead';
+import { MockResponseBody } from './mock-response';
 
 type MockResponse = {
-  body?: Record<string, unknown> | string | ((req: RequestOptions, res: ResponseMock) => unknown);
+  body?: Record<string, unknown> | string | MockResponseBody;
   statusCode?: number;
   headers?: Record<string, unknown>;
 };
