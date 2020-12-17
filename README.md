@@ -4,7 +4,7 @@ This package is a toolbox which contains various helpers we often use when worki
 
 ## `FetchInterceptor`
 
-The `FetchInterceptor` class can be used to intercept the `window.fetch`-calls within the browser. The class takes a key/value object, where the values are `string` or `RegExp` for an URL to intercept. Afterwards there it is possible to resolve a running `fetch` call at any desired time with `await fetchInterceptor.resolve('interceptURLKey')({ t })`. (where `t` is the TestCafe `TestController`)
+The `FetchInterceptor` class can be used to intercept the `window.fetch`-calls within the browser. The class takes a key/value object, where the values are `string` or `RegExp` for an URL to intercept. Afterwards it is possible to resolve a running `fetch` call at any desired time with `await fetchInterceptor.resolve('interceptURLKey')({ t })`. (where `t` is the TestCafe `TestController`)
 
 ### Example
 
