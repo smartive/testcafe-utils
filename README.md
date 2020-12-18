@@ -2,11 +2,13 @@
 
 This package is a toolbox which contains various helpers we often use when working with TestCafe.
 
-## `FetchInterceptor`
+## `FetchInterceptor` or `XHRInterceptor`
 
-The `FetchInterceptor` class can be used to intercept the `window.fetch`-calls within the browser. The class takes a key/value object, where the values are `string` or `RegExp` for an URL to intercept. Afterwards it is possible to resolve a running `fetch` call at any desired time with `await fetchInterceptor.resolve('interceptURLKey')({ t })`. (where `t` is the TestCafe `TestController`)
+The `FetchInterceptor` class can be used to intercept the `window.fetch`-calls within the browser and the `XHRInterceptor` does the same for `XMLHttpRequest`. Both classes take a key/value object as constructor argument, where the values are `string` or `RegExp` for an URL to intercept. Afterwards it is possible to resolve a running `fetch` call at any desired time with `await fetchInterceptor.resolve('interceptURLKey')({ t })`. (where `t` is the TestCafe `TestController`)
 
 ### Example
+
+The example only shows the `FetchInterceptor` because the `XHRInterceptor` is used the same way.
 
 ```Typescript
 // The following snippet does not include all needed imports and code it is intended

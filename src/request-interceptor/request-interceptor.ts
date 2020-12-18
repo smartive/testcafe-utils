@@ -1,7 +1,4 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
-
-type InterceptUrls = Record<string, string | RegExp>;
+export type InterceptUrls = Record<string, string | RegExp>;
 
 declare global {
   const urls: InterceptUrls;
@@ -14,26 +11,24 @@ declare global {
   }
 }
 
-export class FetchInterceptor<T extends InterceptUrls> {
-  private readonly REG_EXP_PREFIX: string = '__RegExp';
+export abstract class RequestInterceptor<T extends InterceptUrls> {
+  protected readonly REG_EXP_PREFIX: string = '__RegExp';
 
-  private readonly clientCode: string = readFileSync(resolve(__dirname, './fetch-interceptor.js')).toString();
+  protected abstract readonly clientCode: string;
 
   constructor(public readonly interceptUrls: T) {}
 
-  public resolve = <
+  public resolve<
     // This type definition only allows keys from the given InterceptUrls
     K extends keyof any &
       {
         [K in keyof T]: T[K] extends string | RegExp ? K : never;
       }[keyof T]
-  >(
-    urlKey: K,
-  ): ((t: { t: TestController }) => Promise<void>) => {
+  >(urlKey: K): (t: { t: TestController }) => Promise<void> {
     const options = { dependencies: { urlKey, urls: this.interceptUrls } };
     return ({ t }: { t: TestController }) =>
       t.eval(() => window.__intercepted[urls[urlKey.toString()].toString()].resolve(), options);
-  };
+  }
 
   public clientScript(): ClientScriptContent {
     const regExpReplacer = (_: any, value: RegExp | unknown) =>
@@ -53,11 +48,12 @@ const regExpReviver = (_, value) => {
   return value;
 };
 
+window.__interceptorName = '${this.constructor.name}';
 window.__interceptUrls = JSON.parse('${urls}', regExpReviver);
 ${this.clientCode}
 
 console.log(
-  '[fetch-interceptor] Intercepted urls and patterns:',
+  '[${this.constructor.name}] Intercepted urls and patterns:',
   window.__interceptUrls.map((url, i) => \`\\n\\t\${i + 1}) \${url}\`).join('')
 );
 `,

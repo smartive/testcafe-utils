@@ -77,7 +77,7 @@ attach().register({
     const interceptedFetch = interceptedUrl ? window.__intercepted[interceptedUrl.toString()] : null;
 
     if (interceptedFetch) {
-      console.log(`[fetch-interceptor] Intercepted '${response.url}' by '${interceptedUrl}'`);
+      console.log(`[${window.__interceptorName}] Intercepted '${response.url}' by '${interceptedUrl}'`);
       return interceptedFetch.promise.then(() => response);
     }
 
