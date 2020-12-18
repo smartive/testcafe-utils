@@ -8,6 +8,7 @@ declare global {
       [key: string]: { resolve: () => void; promise: Promise<void> };
     };
     __interceptUrls: string[];
+    __interceptorName: string;
   }
 }
 
@@ -27,7 +28,12 @@ export abstract class RequestInterceptor<T extends InterceptUrls> {
   >(urlKey: K): (t: { t: TestController }) => Promise<void> {
     const options = { dependencies: { urlKey, urls: this.interceptUrls } };
     return ({ t }: { t: TestController }) =>
-      t.eval(() => window.__intercepted[urls[urlKey.toString()].toString()].resolve(), options);
+      t.eval(() => {
+        const url = urls[urlKey.toString()].toString();
+        console.log(`[${window.__interceptorName}] Resolve call matched by '${url}'`);
+        window.__intercepted[url].resolve();
+        return true;
+      }, options);
   }
 
   public clientScript(): ClientScriptContent {
