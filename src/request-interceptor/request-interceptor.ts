@@ -1,3 +1,5 @@
+import { IClientScript } from '../client-code';
+
 export type InterceptUrls = Record<string, string | RegExp>;
 
 declare global {
@@ -12,7 +14,7 @@ declare global {
   }
 }
 
-export abstract class RequestInterceptor<T extends InterceptUrls> {
+export abstract class RequestInterceptor<T extends InterceptUrls> implements IClientScript {
   protected readonly REG_EXP_PREFIX: string = '__RegExp';
 
   protected abstract readonly clientCode: string;
@@ -32,6 +34,7 @@ export abstract class RequestInterceptor<T extends InterceptUrls> {
         const url = urls[urlKey.toString()].toString();
         console.log(`[${window.__interceptorName}] Resolve call matched by '${url}'`);
         window.__intercepted[url].resolve();
+
         return true;
       }, options);
   }

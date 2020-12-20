@@ -2,6 +2,49 @@
 
 This package is a toolbox which contains various helpers we often use when working with TestCafe.
 
+## `FakeTimers`
+
+The `FakeTimers` class is a TestCafe adaption of (@sinonjs/fake-timers)[https://github.com/sinonjs/fake-timers] and helps to mock/intercept time related functionality.
+
+From their website:
+
+> `@sinonjs/fake-timers` can be used to simulate passing time in automated tests and other situations where you want the scheduling semantics, but don't want to actually wait.
+
+### Example
+
+```Typescript
+// The following snippet does not include all needed imports and code it is intended
+// to give you a starting point and an idea how this class can be used.
+
+import { FakeTimers } from '@smartive/testcafe-utils';
+
+fixture('My Fixture').page`http://localhost:3000`;
+
+const mockClock = new FakeTimers({ toFake: ['setTimeout'] });
+
+test.clientScripts([
+  // IMPORTANT!
+  // This ensures the mock is loaded before your app under test.
+  mockClock.clientScript(),
+])('My Test', (t) =>
+  t
+    .click(page.loadPeople)
+    .expect(page.spinner.exists)
+    .ok()
+
+    // It is also possible to `await mockClock.execute({ t, method: 'next', methodArgs: [] });`
+    // instead of chaining the command.
+    .expect(mockClock.execute({ t, method: 'next', methodArgs: [] }))
+
+    .ok()
+    .expect(page.list.childElementCount)
+    .gt(0)
+    .click(page.loadMorePeople)
+    .expect(page.spinner.exists)
+    .ok()
+);
+```
+
 ## `FetchInterceptor` or `XHRInterceptor`
 
 The `FetchInterceptor` class can be used to intercept the `window.fetch`-calls within the browser and the `XHRInterceptor` does the same for `XMLHttpRequest`. Both classes take a key/value object as constructor argument, where the values are `string` or `RegExp` for an URL to intercept. Afterwards it is possible to resolve a running `fetch` call at any desired time with `await fetchInterceptor.resolve('interceptURLKey')({ t })`. (where `t` is the TestCafe `TestController`)
@@ -24,9 +67,17 @@ const fetchInterceptor = new FetchInterceptor({
   fetchMore: /.+swapi\.dev.+\/people\/\?page=.+/,
 });
 
-test.clientScripts([fetchInterceptor.clientScript()])('My Test', async (t) => {
+test.clientScripts([
+  // IMPORTANT!
+  // This ensures the mock is loaded before your app under test.
+  fetchInterceptor.clientScript(),
+])('My Test', async (t) => {
   await t.click(page.loadPeople).expect(page.spinner.exists).ok();
+
+  // It is also possible to "inline/chain" `fetchInterceptor.resolve` like
+  // `.expect(fetchInterceptor.resolve('fetchPeople')({ t })).ok()`
   await fetchInterceptor.resolve('fetchPeople')({ t });
+
   await t
     .expect(page.list.childElementCount)
     .gt(0)
