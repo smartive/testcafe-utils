@@ -47,7 +47,7 @@ test.clientScripts([
 
 ## `FetchInterceptor` or `XHRInterceptor`
 
-The `FetchInterceptor` class can be used to intercept the `window.fetch`-calls within the browser and the `XHRInterceptor` does the same for `XMLHttpRequest`. Both classes take a key/value object as constructor argument, where the values are `string` or `RegExp` for an URL to intercept. Afterwards it is possible to resolve a running `fetch` call at any desired time with `await fetchInterceptor.resolve('interceptURLKey')({ t })`. (where `t` is the TestCafe `TestController`)
+The `FetchInterceptor` class can be used to intercept the `window.fetch`-calls within the browser and the `XHRInterceptor` does the same for `XMLHttpRequest`. Both classes take a key/value object as constructor argument, where the values are `string`, `RegExp` or `{ method: HTTPMethod, pattern: RegExp | string }` to intercept an URL. Afterwards it is possible to resolve a running `fetch` call at any desired time with `await fetchInterceptor.resolve('interceptURLKey')({ t })`. (where `t` is the TestCafe `TestController`)
 
 ### Example
 
@@ -64,7 +64,7 @@ fixture('My Fixture').page`http://localhost:3000`;
 const fetchInterceptor = new FetchInterceptor({
   fetchLuke: 'https://swapi.dev/api/people/1/',
   fetchPeople: /.+swapi\.dev.+\/people\/$/,
-  fetchMore: /.+swapi\.dev.+\/people\/\?page=.+/,
+  fetchMore: { method: 'GET', pattern: /.+swapi\.dev.+\/people\/\?page=.+/ },
 });
 
 test.clientScripts([

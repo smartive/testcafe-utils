@@ -1,86 +1,28 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
+(() => {
+  type FetchArgs = [input: RequestInfo, init?: RequestInit];
 
-// adapted from https://github.com/werk85/fetch-intercept
+  const interceptor = (url: string, method: string): Promise<void> => {
+    const { key, interceptor } = window.__findInterceptor(url, method);
 
-let interceptors = [];
-function interceptor(fetch, ...args) {
-  const reversedInterceptors = interceptors.reduce((array, interceptor) => [interceptor].concat(array), []);
-
-  let promise = Promise.resolve(args);
-
-  reversedInterceptors.forEach(({ request, requestError }) => {
-    if (request || requestError) {
-      promise = promise.then((args) => request(...args), requestError);
+    if (interceptor) {
+      console.log(`[${window.__interceptorName}] Intercepted '${url}' by '${key}'`);
+      return interceptor.promise;
     }
-  });
 
-  promise = promise.then((args) => fetch(...args));
-
-  reversedInterceptors.forEach(({ response, responseError }) => {
-    if (response || responseError) {
-      promise = promise.then(response, responseError);
-    }
-  });
-
-  return promise;
-}
-
-function attach() {
-  window.fetch = (function (fetch) {
-    return function (...args) {
-      return interceptor(fetch, ...args);
-    };
-  })(window.fetch);
-
-  return {
-    register: function (interceptor) {
-      interceptors.push(interceptor);
-      return () => {
-        const index = interceptors.indexOf(interceptor);
-        if (index >= 0) {
-          interceptors.splice(index, 1);
-        }
-      };
-    },
-    clear: function () {
-      interceptors = [];
-    },
+    return Promise.resolve();
   };
-}
 
-window.__intercepted = window.__interceptUrls
-  ? window.__interceptUrls.reduce(
-      (urls, url) =>
-        Object.assign(urls, {
-          [url]: (() => {
-            let resolvePromise;
-            const promise = new Promise((resolve) => {
-              resolvePromise = resolve;
-            });
+  const attach = () => {
+    window.fetch = ((fetch) => {
+      return async (...args: FetchArgs) => {
+        const [url, options] = args;
 
-            return {
-              promise,
-              resolve: resolvePromise,
-            };
-          })(),
-        }),
-      {},
-    )
-  : {};
+        await interceptor(url.toString(), options?.method || 'GET');
 
-attach().register({
-  response: function (response) {
-    const interceptedUrl = window.__interceptUrls.find((url) =>
-      url instanceof RegExp ? url.test(response.url) : url === response.url,
-    );
-    const interceptedFetch = interceptedUrl ? window.__intercepted[interceptedUrl.toString()] : null;
+        return fetch(...args);
+      };
+    })(window.fetch);
+  };
 
-    if (interceptedFetch) {
-      console.log(`[${window.__interceptorName}] Intercepted '${response.url}' by '${interceptedUrl}'`);
-      return interceptedFetch.promise.then(() => response);
-    }
-
-    return response;
-  },
-});
+  attach();
+})();
