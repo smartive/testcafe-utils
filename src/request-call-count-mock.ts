@@ -1,5 +1,5 @@
 import { RequestHook } from 'testcafe';
-import { ResponseMock } from 'testcafe-hammerhead';
+import { ResponseMock, RequestEvent } from 'testcafe-hammerhead';
 import { MockResponseBody } from './mock-response';
 
 type MockResponse = {
@@ -19,9 +19,7 @@ export class RequestCallCountMock extends RequestHook {
     this.mocks = mocks;
   }
 
-  // Cause TestCafe types are not explicit enough
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  public onRequest(event: any): any {
+  public onRequest(event: RequestEvent): any {
     const { body, statusCode, headers } = this.mocks[this.callCount] || this.mocks[this.mocks.length - 1];
     event.setMock(
       new ResponseMock(body as any, statusCode, {
