@@ -51,7 +51,7 @@
   },
   "homepage": "https://github.com/smartive/testcafe-utils#readme",
   "dependencies": {
-    "@types/sinonjs__fake-timers": "^6.0.2"
+    "@types/sinonjs__fake-timers": "^8.0.0"
   },
   "peerDependencies": {
     "testcafe": "^1.9.4"
